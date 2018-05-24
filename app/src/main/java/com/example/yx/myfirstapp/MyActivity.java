@@ -22,6 +22,8 @@ public class MyActivity extends AppCompatActivity {
                     // app的功能逻辑处理
                     if(isProessRunning(getBaseContext(),ProssName)){
                         //Launcher
+
+
                     }else{
                         //Close
                     }
