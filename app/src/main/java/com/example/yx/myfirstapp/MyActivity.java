@@ -1,6 +1,9 @@
 package com.example.yx.myfirstapp;
 
 import android.app.ActivityManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -16,7 +20,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,7 +92,7 @@ public class MyActivity extends AppCompatActivity {
 
         return isRunning;
     }
-//OPPO R9s Plus
+    //OPPO R9s Plus
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +103,29 @@ public class MyActivity extends AppCompatActivity {
         Log.e(TAG, "手机当前系统语言：" + SystemUtil.getSystemLanguage());
         Log.e(TAG, "Android系统版本号：" + SystemUtil.getSystemVersion());
         Log.e(TAG, "手机IMEI：" + SystemUtil.getIMEI(getApplicationContext()));
+        //删除数据
+        SystemUtil.clearUserData(this);
+
+        //打开通知
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        Intent intent = new Intent(MyActivity.this, MyActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        NotificationCompat.Builder compat = new NotificationCompat.Builder(this);
+        compat.setContentTitle("This is content title!");
+        compat.setContentText("This is content text!");
+        compat.setWhen(System.currentTimeMillis());
+        compat.setContentIntent(pendingIntent);
+//        compat.setSmallIcon(android.R.drawable.sym_action_email);
+      //compat.setLargeIcon(BitmapFactory.decodeResource(getResources(), android.R.drawable.ic_dialog_map));
+        compat.setAutoCancel(false);
+//        compat.setSound()设置通知的声音
+//        compat.setVibrate(new long[]{0,1000,500,1000});设置通知震动下表1表示静止的时长，下表2是震动的时长。（双数下标是静止时长，单数下标是震动时长）
+//        compat.setLights(Color.RED,1000,1000);设置呼吸灯
+//        compat.setDefaults(NotificationCompat.COLOR_DEFAULT);根据手机当前环境调节
+        compat.build();
+        Notification notification = compat.build();
+        manager.notify(1, notification);
+
     }
 
     @Override

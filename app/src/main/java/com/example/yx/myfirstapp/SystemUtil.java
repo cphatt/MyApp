@@ -1,9 +1,18 @@
 package com.example.yx.myfirstapp;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Environment;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -69,5 +78,110 @@ public class SystemUtil {
             return tm.getDeviceId();
         }
         return null;
+    }
+
+    /**
+     * 根据包名判断是否APP安装
+     * @param context
+     * @param packageName
+     * @return
+     */
+    public static boolean isInstall(Context context , String packageName) {
+        if (packageName == null || "".equals(packageName))
+            return false;
+        try {
+            ApplicationInfo info = context.getPackageManager().getApplicationInfo(
+                    packageName, PackageManager.GET_UNINSTALLED_PACKAGES);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+    /**
+     * 进程运行状态
+     * @param context
+     * @param proessName    进程名
+     * @return
+     */
+    public static boolean isProessRunning(Context context, String proessName) {
+
+        boolean isRunning = false;
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        int apiver = Build.VERSION.SDK_INT;
+        if (apiver > Build.VERSION_CODES.KITKAT){
+            List<ProcessManager.Process> runningProcesses=new ArrayList<>();
+            PackageManager pm = context.getPackageManager();
+            runningProcesses = ProcessManager.getRunningProcesses();
+            for (ProcessManager.Process runningProcesse : runningProcesses) {
+                String packname = runningProcesse.getPackageName();
+                Log.e("进程---", packname);
+                if(packname.equals(proessName)){
+                    //Log.i("Service2进程", ""+info.processName);
+                    isRunning = true;
+                }
+            }
+        }else{
+            List<ActivityManager.RunningAppProcessInfo> lists = am.getRunningAppProcesses();
+            for(ActivityManager.RunningAppProcessInfo info : lists){
+                if(info.processName.equals(proessName)){
+                    //Log.i("Service2进程", ""+info.processName);
+                    isRunning = true;
+                }
+            }
+        }
+
+        return isRunning;
+    }
+
+    /**
+     * 查看服务是否运行
+     * @param mContext
+     * @param serviceName
+     * @return
+     */
+    public static boolean isServiceWork(Context mContext, String serviceName) {
+        boolean isWork = false;
+        ActivityManager myAM = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> myList = myAM.getRunningServices(40);
+        if (myList.size() <= 0) {
+            return false;
+        }
+        for (int i = 0; i < myList.size(); i++) {
+            String mName = myList.get(i).service.getClassName().toString();
+            if (mName.equals(serviceName)) {
+                isWork = true;
+                break;
+            }
+        }
+        return isWork;
+    }
+
+    /**
+     * 删除文件夹
+     * @param dir
+     * @return
+     */
+    private static boolean deleteDir(File dir) {
+        if (dir != null && dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        return dir.delete();
+    }
+
+    /**
+     * 删除缓存
+     * @param context
+     */
+    public static void clearUserData(Context context) {
+        deleteDir(context.getCacheDir());
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            deleteDir(context.getExternalCacheDir());
+        }
     }
 }
